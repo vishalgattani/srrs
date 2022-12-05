@@ -1,3 +1,14 @@
+'''
+Self-Replicating Robot System
+====================================================================================================================
+Author: Vishal Gattani
+E-mail: vgattani@umd.edu
+--------------------------------------------------------------------------------------------------------------------
+Libraries to be installed using the command: $ pip3 install matplotlib numpy pandas plotly chart_studio
+--------------------------------------------------------------------------------------------------------------------
+'''
+#
+
 import platform
 print(f'Python version: {platform.python_version()}')
 import random
@@ -20,10 +31,10 @@ import chart_studio.tools as tls
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.express as px
+
 username = 'vishalgattani' # your username\n",
 api_key = 'WSy2EFPTbxYYm3Rmcx53' # your api key - go to profile > settings > regenerate key\n",
 chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
-
 
 
 '''
