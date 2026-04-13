@@ -1,57 +1,143 @@
-# SRRS
-***
-Simulation and Analysis of Self-Replicating Robotic Systems
+# SRRS — Self-Replicating Robot System
 
-## Project Report
+Simulation and Reliability, Availability, Maintainability (RAM) analysis of self-replicating robotic systems across 6 configurations.
 
-The project report is available [here](link). A short description of what the project aims to achieve is given below.
+![CI](https://github.com/vishalgattani/srrs/actions/workflows/ci.yml/badge.svg)
 
-## Results
+---
 
-### SysML Diagrams
+## Overview
 
+SRRS models robot colonies that can collect materials, print components, and assemble new robots. Six configurations are studied, varying replication strategy (Homogeneous vs Heterogeneous) and robot mix (One type vs External specialists):
 
-### Visualization
+| Config | Description |
+|--------|-------------|
+| CHO | Collect-Homogeneous-One — single replicator builds Normal workers |
+| DHO | Deterministic-Homogeneous-One — replicator clones itself |
+| HHO | Heterogeneous-Homogeneous-One — replicator alternates Normal/Replicator |
+| CHE | Collect-Heterogeneous-External — Assembler + Printer team builds Normal workers |
+| DHE | Deterministic-Heterogeneous-External — Assembler + Printer alternate clones |
+| HHE | Heterogeneous-Heterogeneous-External — rotating 3-type build cycle |
 
-The number of Robots 'In-service' and 'Out-of-service' are plotted as results for the different configurations. The report link decribes the intrinsic nature of these 6 different configurations and the analysis performed. 
+---
 
-<div>
-    <a href="https://plotly.com/~vishalgattani/74/?share_key=r8oB4JL6MEMexQFL0w2jyc" target="_blank" title="CHO - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/74.png?share_key=r8oB4JL6MEMexQFL0w2jyc" alt="CHO - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
+## Package Structure
 
-<div>
-    <a href="https://plotly.com/~vishalgattani/78/?share_key=T91UzaxWdNdwDnX1ZmcPeC" target="_blank" title="DHO - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/78.png?share_key=T91UzaxWdNdwDnX1ZmcPeC" alt="DHO - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
-
-<div>
-    <a href="https://plotly.com/~vishalgattani/82/?share_key=DBaf6zpBxI5Lj5UM8KzaIC" target="_blank" title="HHO - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/82.png?share_key=DBaf6zpBxI5Lj5UM8KzaIC" alt="HHO - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
-
-<div>
-    <a href="https://plotly.com/~vishalgattani/86/?share_key=jRHAUy9Jn8pJHZSIY1lHUq" target="_blank" title="CHE - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/86.png?share_key=jRHAUy9Jn8pJHZSIY1lHUq" alt="CHE - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
-
-<div>
-    <a href="https://plotly.com/~vishalgattani/90/?share_key=LrBlYzbhjVcVLNHAOn9JU6" target="_blank" title="DHE - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/90.png?share_key=LrBlYzbhjVcVLNHAOn9JU6" alt="DHE - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
-
-<div>
-    <a href="https://plotly.com/~vishalgattani/94/?share_key=uSdHNAypo5q3zOxpEApyE2" target="_blank" title="HHE - Habitat over time.html" style="display: block; text-align: center;"><img src="https://plotly.com/~vishalgattani/94.png?share_key=uSdHNAypo5q3zOxpEApyE2" alt="HHE - Habitat over time.html" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plotly.com/404.png';" /></a>
-</div>
-
-
-## Libraries 
-
-```sh
-pip3 install pandas
-pip3 install plotly
-pip3 install chart_studio
-pip3 install cufflinks
-pip3 install numpy
-````
-
-## Running the code
-
-```sh
-jupyter nbconvert --execute --clear-output srrs.ipynb
 ```
+python/
+├── models/
+│   ├── types.py        ← RobotType, TaskType, Config, SimMode enums
+│   ├── robot.py        ← Robot base class + Replicator/Normal/Assembler/Printer
+│   └── resources.py    ← Simulation resource state (materials, env_materials, …)
+├── simulation/
+│   ├── config.py       ← SimulationParams (all tunable parameters)
+│   └── runner.py       ← Core simulation loop (deterministic + MC)
+├── analysis/
+│   ├── ram.py          ← System-level MTBF / MTTR / MDT / Aoss
+│   └── stats.py        ← MC aggregation + confidence intervals
+├── visualization/
+│   └── plots.py        ← Plotly HTML output (6-panel summary + MC distributions)
+└── main.py             ← CLI entrypoint
+```
+
+---
+
+## Installation
+
+```bash
+# From source
+pip install -e ".[dev]"
+
+# From built wheel
+pip install dist/srrs-*.whl
+```
+
+---
+
+## Usage
+
+### CLI
+
+```bash
+# Deterministic — single config, 100 timesteps
+python -m python.main --config CHO --mode D --timesteps 100
+
+# Deterministic — with Plotly HTML output
+python -m python.main --config CHO --mode D --timesteps 250 --plot --output-dir output/
+
+# Monte Carlo — 6 configs, 500 runs each
+python -m python.main --config CHO DHO HHO CHE DHE HHE --mode MC --mc-runs 500 --timesteps 250 --plot
+
+# All options
+python -m python.main --help
+```
+
+### Python API
+
+```python
+from python.models.types import Config, SimMode
+from python.models.resources import Resources
+from python.simulation.config import SimulationParams
+from python.simulation.runner import run_simulation
+
+params = SimulationParams(
+    config=Config.CHO,
+    mode=SimMode.DETERMINISTIC,
+    timesteps=100,
+    quality_threshold=0.5,
+    risk_threshold=3.0,
+)
+
+df, ram = run_simulation(params)
+print(f"Final robots: {df['#In'].iloc[-1]}")
+print(f"System Aoss: {ram.aoss:.4f}")
+```
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run tests for a specific config with coverage
+pytest tests/test_CHO.py -v --cov=python --cov-report=term-missing
+
+# Run all configs
+pytest tests/ -v --cov=python --cov-report=term-missing
+```
+
+---
+
+## CI
+
+GitHub Actions runs on every push and PR:
+
+1. **build** — installs `build`, runs `python -m build --wheel`, uploads the `.whl` as an artifact
+2. **test / CHO … HHE** — 6 parallel jobs, each downloads the wheel, installs it, and runs `pytest tests/test_<CONFIG>.py` with coverage
+
+---
+
+## RAM Metrics
+
+| Metric | Description |
+|--------|-------------|
+| MTBF | Mean Time Between Failures |
+| MTTR | Mean Time To Repair |
+| MDT | Mean Down Time |
+| Aoss | Operational Steady-State Availability |
+
+---
+
+## Dependencies
+
+```
+numpy
+pandas
+plotly
+pydantic>=2.0
+python-dotenv
+```
+
+Dev: `pytest`, `pytest-cov`
