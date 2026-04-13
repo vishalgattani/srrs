@@ -3,7 +3,7 @@
 Simulation and Reliability, Availability, Maintainability (RAM) analysis of self-replicating robotic systems across 6 configurations.
 
 ![CI](https://github.com/vishalgattani/srrs/actions/workflows/ci.yml/badge.svg)
-[![codecov](https://codecov.io/gh/vishalgattani/srrs/branch/main/graph/badge.svg)](https://codecov.io/gh/vishalgattani/srrs)
+![Coverage](./coverage.svg)
 
 ---
 

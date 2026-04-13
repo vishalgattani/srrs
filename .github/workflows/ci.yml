@@ -78,11 +78,18 @@ jobs:
           retention-days: 1
 
   coverage:
-    name: Upload coverage to Codecov
+    name: Generate coverage badge
     needs: test
     runs-on: ubuntu-latest
+    # Only update badge on pushes to main (not on PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
@@ -91,11 +98,70 @@ jobs:
           path: coverage-reports/
           merge-multiple: true
 
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-reports/*.xml
-          flags: unittests
-          name: srrs-coverage
-          fail_ci_if_error: true
+      - name: Install coverage tools
+        run: pip install coverage coverage-badge
+
+      - name: Merge coverage XMLs and generate badge
+        run: |
+          # Combine all XML reports into one .coverage data file
+          pip install lxml
+          python - <<'EOF'
+          import xml.etree.ElementTree as ET
+          import glob
+
+          files = glob.glob("coverage-reports/*.xml")
+          total_hits = 0
+          total_misses = 0
+
+          for f in files:
+              tree = ET.parse(f)
+              root = tree.getroot()
+              for line in root.iter("line"):
+                  hits = int(line.get("hits", 0))
+                  if hits > 0:
+                      total_hits += 1
+                  else:
+                      total_misses += 1
+
+          total = total_hits + total_misses
+          pct = round((total_hits / total * 100) if total else 0)
+
+          # Pick color
+          if pct >= 90:
+              color = "brightgreen"
+          elif pct >= 75:
+              color = "green"
+          elif pct >= 60:
+              color = "yellow"
+          else:
+              color = "red"
+
+          svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="120" height="20">
+            <linearGradient id="s" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <rect rx="3" width="120" height="20" fill="#555"/>
+            <rect rx="3" x="62" width="58" height="20" fill="{'#4c1' if color == 'brightgreen' else '#97ca00' if color == 'green' else '#dfb317' if color == 'yellow' else '#e05d44'}"/>
+            <rect rx="3" width="120" height="20" fill="url(#s)"/>
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="31" y="15" fill="#010101" fill-opacity=".3">coverage</text>
+              <text x="31" y="14">coverage</text>
+              <text x="90" y="15" fill="#010101" fill-opacity=".3">{pct}%</text>
+              <text x="90" y="14">{pct}%</text>
+            </g>
+          </svg>'''
+
+          with open("coverage.svg", "w") as out:
+              out.write(svg)
+
+          print(f"Coverage: {pct}% ({total_hits}/{total} lines)")
+          EOF
+
+      - name: Commit badge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add coverage.svg
+          git diff --cached --quiet || git commit -m "ci: update coverage badge [skip ci]"
+          git push
