@@ -27,3 +27,9 @@ Deterministic_Mode/
 MC_Mode/
 .env
 *.ipynb
+
+# Build artifacts
+dist/
+build/
+*.whl
+*.egg-info/
