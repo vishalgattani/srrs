@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    name: Build wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build wheel
+        run: python -m build --wheel --outdir dist/
+
+      - name: Verify wheel exists
+        run: ls dist/*.whl
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: srrs-wheel
+          path: dist/*.whl
+          retention-days: 1
+
+  test:
+    name: Test / ${{ matrix.config }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [CHO, DHO, HHO, CHE, DHE, HHE]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: srrs-wheel
+          path: dist/
+
+      - name: Install wheel + dev deps
+        run: |
+          pip install dist/*.whl
+          pip install pytest pytest-cov
+
+      - name: Run tests for ${{ matrix.config }}
+        run: |
+          pytest tests/test_${{ matrix.config }}.py -v \
+            --tb=short \
+            --cov=python \
+            --cov-report=term-missing
