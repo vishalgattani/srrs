@@ -67,4 +67,5 @@ jobs:
           pytest tests/test_${{ matrix.config }}.py -v \
             --tb=short \
             --cov=python \
-            --cov-report=term-missing
+            --cov-report=term-missing \
+            --cov-report=xml:coverage-${{ matrix.config }}.xml

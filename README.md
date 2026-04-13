@@ -3,6 +3,7 @@
 Simulation and Reliability, Availability, Maintainability (RAM) analysis of self-replicating robotic systems across 6 configurations.
 
 ![CI](https://github.com/vishalgattani/srrs/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://img.shields.io/badge/coverage-70%25-yellow)
 
 ---
 
