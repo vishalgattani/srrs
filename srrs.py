@@ -32,9 +32,14 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.express as px
 
-username = 'vishalgattani' # your username\n",
-api_key = 'WSy2EFPTbxYYm3Rmcx53' # your api key - go to profile > settings > regenerate key\n",
-chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+username = os.getenv('CHART_STUDIO_USERNAME', '')
+api_key = os.getenv('CHART_STUDIO_API_KEY', '')
+if username and api_key:
+    chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
 
 
 '''
