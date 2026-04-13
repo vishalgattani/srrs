@@ -17,12 +17,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from .models.types import Config, SimMode
-from .models.resources import Resources
-from .simulation.config import SimulationParams
-from .simulation.runner import run_simulation
-from .analysis.stats import aggregate_mc_results, compute_confidence_intervals, describe_results
-from .visualization.plots import plot_simulation, plot_mc_distributions
+from python.models.types import Config, SimMode
+from python.models.resources import Resources
+from python.simulation.config import SimulationParams
+from python.simulation.runner import run_simulation
+from python.analysis.stats import aggregate_mc_results, compute_confidence_intervals, describe_results
+from python.visualization.plots import plot_simulation, plot_mc_distributions
 
 
 def parse_args() -> argparse.Namespace:

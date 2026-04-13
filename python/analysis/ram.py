@@ -10,7 +10,7 @@ from typing import NamedTuple
 
 import numpy as np
 
-from ..models.robot import Robot
+from python.models.robot import Robot
 
 
 class RAMResult(NamedTuple):

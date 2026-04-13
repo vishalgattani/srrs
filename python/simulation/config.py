@@ -6,8 +6,8 @@ Created: 2026-04-13
 """
 
 from pydantic import BaseModel, Field
-from ..models.types import Config, SimMode
-from ..models.resources import Resources
+from python.models.types import Config, SimMode
+from python.models.resources import Resources
 
 
 # Assembly cost tables: [Replicator, Normal, Assembler, Printer]

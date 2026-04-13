@@ -13,7 +13,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, Field, computed_field
 
-from .types import RobotType, TaskType
+from python.models.types import RobotType, TaskType
 
 
 class Robot(BaseModel):

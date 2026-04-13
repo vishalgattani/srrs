@@ -13,11 +13,11 @@ from copy import deepcopy
 
 import pandas as pd
 
-from ..models.robot import Robot, Replicator, Normal, Assembler, Printer, make_robot
-from ..models.resources import Resources
-from ..models.types import RobotType, TaskType, Config
-from ..simulation.config import SimulationParams, COST_PR, COST_NON_PR
-from ..analysis.ram import compute_system_ram, RAMResult
+from python.models.robot import Robot, Replicator, Normal, Assembler, Printer, make_robot
+from python.models.resources import Resources
+from python.models.types import RobotType, TaskType, Config
+from python.simulation.config import SimulationParams, COST_PR, COST_NON_PR
+from python.analysis.ram import compute_system_ram, RAMResult
 
 DECIMAL_PLACES = 3
 
