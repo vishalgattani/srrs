@@ -69,3 +69,33 @@ jobs:
             --cov=python \
             --cov-report=term-missing \
             --cov-report=xml:coverage-${{ matrix.config }}.xml
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.config }}
+          path: coverage-${{ matrix.config }}.xml
+          retention-days: 1
+
+  coverage:
+    name: Upload coverage to Codecov
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-reports/
+          merge-multiple: true
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-reports/*.xml
+          flags: unittests
+          name: srrs-coverage
+          fail_ci_if_error: true
