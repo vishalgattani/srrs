@@ -21,3 +21,7 @@ output/
 
 # macOS
 .DS_Store
+
+# Simulation output directories
+Deterministic_Mode/
+MC_Mode/
