@@ -26,3 +26,4 @@ output/
 Deterministic_Mode/
 MC_Mode/
 .env
+*.ipynb
