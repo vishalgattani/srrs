@@ -1,2 +1,23 @@
 
 .DS_Store
+
+# Plan/build protocol docs (local only)
+plan_*.md
+build_*.md
+
+# Jupyter
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Generated output
+images/
+output/
+
+# macOS
+.DS_Store
