@@ -9,9 +9,9 @@ import math
 import pytest
 import pandas as pd
 
-from python.models.types import Config, SimMode
-from python.simulation.config import SimulationParams
-from python.simulation.runner import run_simulation
+from srrs.models.types import Config, SimMode
+from srrs.simulation.config import SimulationParams
+from srrs.simulation.runner import run_simulation
 
 
 TIMESTEPS = 50  # short run for CI speed

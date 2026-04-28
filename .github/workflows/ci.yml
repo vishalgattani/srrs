@@ -7,36 +7,57 @@ on:
     branches: [main, develop]
 
 jobs:
-  build:
-    name: Build wheel
+  build-image:
+    name: Build Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Build CI image
+        run: docker build -t srrs-ci -f docker/Dockerfile .
 
-      - name: Install build tools
-        run: pip install build
+      - name: Save image
+        run: docker save srrs-ci | gzip > srrs-ci.tar.gz
 
-      - name: Build wheel
-        run: python -m build --wheel --outdir dist/
-
-      - name: Verify wheel exists
-        run: ls dist/*.whl
-
-      - name: Upload wheel artifact
+      - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: srrs-wheel
-          path: dist/*.whl
+          name: srrs-ci-image
+          path: srrs-ci.tar.gz
           retention-days: 1
+
+  smoke:
+    name: Smoke test CLI
+    needs: build-image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download image
+        uses: actions/download-artifact@v4
+        with:
+          name: srrs-ci-image
+
+      - name: Load image
+        run: docker load < srrs-ci.tar.gz
+
+      - name: Run CLI — all configs deterministic
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app -w /app \
+            srrs-ci \
+            srrs --config CHO DHO HHO CHE DHE HHE --mode D --timesteps 50
+
+      - name: Run CLI — with plot output
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app -w /app \
+            srrs-ci \
+            srrs --config CHO --mode D --timesteps 50 --plot --output-dir /tmp/output
 
   test:
     name: Test / ${{ matrix.config }}
-    needs: build
+    needs: [build-image, smoke]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -46,29 +67,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Download wheel
+      - name: Download image
         uses: actions/download-artifact@v4
         with:
-          name: srrs-wheel
-          path: dist/
+          name: srrs-ci-image
 
-      - name: Install wheel + dev deps
-        run: |
-          pip install dist/*.whl
-          pip install pytest pytest-cov
+      - name: Load image
+        run: docker load < srrs-ci.tar.gz
 
       - name: Run tests for ${{ matrix.config }}
         run: |
-          pytest tests/test_${{ matrix.config }}.py -v \
-            --tb=short \
-            --cov=python \
-            --cov-report=term-missing \
-            --cov-report=xml:coverage-${{ matrix.config }}.xml
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            srrs-ci \
+            pytest tests/test_${{ matrix.config }}.py -v \
+              --tb=short \
+              --cov=srrs \
+              --cov-report=term-missing \
+              --cov-report=xml:coverage-${{ matrix.config }}.xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -81,15 +98,9 @@ jobs:
     name: Generate coverage badge
     needs: test
     runs-on: ubuntu-latest
-    # Only update badge on pushes to main (not on PRs)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
 
       - name: Download all coverage reports
         uses: actions/download-artifact@v4
@@ -99,13 +110,11 @@ jobs:
           merge-multiple: true
 
       - name: Install coverage tools
-        run: pip install coverage coverage-badge
+        run: pip install lxml
 
       - name: Merge coverage XMLs and generate badge
         run: |
-          # Combine all XML reports into one .coverage data file
-          pip install lxml
-          python - <<'EOF'
+          python3 - <<'EOF'
           import xml.etree.ElementTree as ET
           import glob
 
@@ -126,15 +135,14 @@ jobs:
           total = total_hits + total_misses
           pct = round((total_hits / total * 100) if total else 0)
 
-          # Pick color
           if pct >= 90:
-              color = "brightgreen"
+              color = "#4c1"
           elif pct >= 75:
-              color = "green"
+              color = "#97ca00"
           elif pct >= 60:
-              color = "yellow"
+              color = "#dfb317"
           else:
-              color = "red"
+              color = "#e05d44"
 
           svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="120" height="20">
             <linearGradient id="s" x2="0" y2="100%">
@@ -142,7 +150,7 @@ jobs:
               <stop offset="1" stop-opacity=".1"/>
             </linearGradient>
             <rect rx="3" width="120" height="20" fill="#555"/>
-            <rect rx="3" x="62" width="58" height="20" fill="{'#4c1' if color == 'brightgreen' else '#97ca00' if color == 'green' else '#dfb317' if color == 'yellow' else '#e05d44'}"/>
+            <rect rx="3" x="62" width="58" height="20" fill="{color}"/>
             <rect rx="3" width="120" height="20" fill="url(#s)"/>
             <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
               <text x="31" y="15" fill="#010101" fill-opacity=".3">coverage</text>

@@ -131,6 +131,18 @@ GitHub Actions runs on every push and PR:
 
 ---
 
+## References
+
+This simulation is based on:
+
+> "Simulation and Analysis of Self-Replicating Robot Decision-Making Systems."
+> *Computers* 2021, 10(1), 9. MDPI.
+> https://www.mdpi.com/2073-431X/10/1/9
+
+The 6 system configurations (CHO, DHO, HHO, CHE, DHE, HHE), replication decision logic, and RAM analysis methodology are derived from this paper.
+
+---
+
 ## Dependencies
 
 ```

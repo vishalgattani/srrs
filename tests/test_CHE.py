@@ -6,8 +6,8 @@ Created: 2026-04-13
 """
 
 import pytest
-from python.models.types import Config
-from python.simulation.runner import run_simulation
+from srrs.models.types import Config
+from srrs.simulation.runner import run_simulation
 from .conftest import make_params, assert_valid_df, assert_valid_ram
 
 
